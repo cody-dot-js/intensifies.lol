@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "@ngrok/mantle/mantle.css";
+
+@keyframes shake {
+	0%,
+	100% {
+		transform: translate(0, 0) rotate(0deg);
+	}
+	10%,
+	30%,
+	50%,
+	70%,
+	90% {
+		transform: translate(-2px, 0) rotate(-1deg);
+	}
+	20%,
+	40%,
+	60%,
+	80% {
+		transform: translate(2px, 0) rotate(1deg);
+	}
+}
+
+@keyframes intensify {
+	0%,
+	100% {
+		transform: translate(0, 0) rotate(0deg);
+	}
+	10%,
+	30%,
+	50%,
+	70%,
+	90% {
+		transform: translate(-1px, -1px) rotate(-0.5deg);
+	}
+	20%,
+	40%,
+	60%,
+	80% {
+		transform: translate(1px, 1px) rotate(0.5deg);
+	}
+}
+
+@theme {
+	--animate-shake: shake 0.5s ease-in-out infinite;
+	--animate-intensify: intensify 0.8s ease-in-out infinite;
+}

@@ -1,0 +1,134 @@
+<!doctype html>
+<html dir="ltr" lang="en-US">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="preconnect" href="https://assets.ngrok.com" />
+		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>intensifies.lol</title>
+		<meta name="description" content="Upload an image and make it an INTENSIFIED gif!" />
+		<meta name="author" content="cody-dot-js" />
+		<script>
+			(function te(e) {
+				const {
+					storageKey: t,
+					defaultTheme: o,
+					themes: n,
+					resolvedThemes: i,
+					prefersDarkModeMediaQuery: s,
+					prefersHighContrastMediaQuery: p,
+				} = e;
+				function a(r) {
+					return typeof r == "string" && n.includes(r);
+				}
+				function g(r) {
+					const l = document.cookie;
+					if (!l) return null;
+					try {
+						const E = l
+							.split(";")
+							.find((F) => F.trim().startsWith(`${r}=`))
+							?.split("=")[1];
+						return E ? decodeURIComponent(E) : null;
+					} catch {
+						return null;
+					}
+				}
+				function u(r, l) {
+					const f = new Date();
+					f.setFullYear(f.getFullYear() + 1);
+					const L = location.hostname,
+						E = location.protocol,
+						W = L === "ngrok.com" || L.endsWith(".ngrok.com") ? "; domain=.ngrok.com" : "",
+						F = E === "https:" ? "; Secure" : "";
+					return `${r}=${encodeURIComponent(l)}; expires=${f.toUTCString()}; path=/${W}; SameSite=Lax${F}`;
+				}
+				function w(r, l) {
+					try {
+						document.cookie = u(r, l);
+					} catch {}
+				}
+				function h(r, l, f) {
+					return r === "system" ? (f ? (l ? "dark-high-contrast" : "light-high-contrast") : l ? "dark" : "light") : r;
+				}
+				let c = null,
+					k = null,
+					S = null;
+				try {
+					c = g(t);
+				} catch {}
+				if (a(c)) S = c;
+				else {
+					try {
+						k = window.localStorage?.getItem(t) ?? null;
+					} catch {}
+					a(k) && (S = k);
+				}
+				const b = a(S) ? S : o,
+					O = matchMedia(s).matches,
+					K = matchMedia(p).matches,
+					_ = h(b, O, K),
+					T = document.documentElement;
+				if (T.dataset.appliedTheme !== _ || T.dataset.theme !== b) {
+					for (const r of i) T.classList.remove(r);
+					(T.classList.add(_), (T.dataset.theme = b), (T.dataset.appliedTheme = _));
+				}
+				const I = a(c);
+				try {
+					if (a(k) && !I) {
+						w(t, k);
+						try {
+							window.localStorage.removeItem(t);
+						} catch {}
+					} else I || w(t, b);
+				} catch {}
+			})({
+				storageKey: "mantle-ui-theme",
+				defaultTheme: "system",
+				themes: ["system", "light", "dark", "light-high-contrast", "dark-high-contrast"],
+				resolvedThemes: ["light", "dark", "light-high-contrast", "dark-high-contrast"],
+				prefersDarkModeMediaQuery: "(prefers-color-scheme: dark)",
+				prefersHighContrastMediaQuery: "(prefers-contrast: more)",
+			});
+		</script>
+		<link
+			rel="preload"
+			href="https://assets.ngrok.com/fonts/roobert/roobert-proportional-vf.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="https://assets.ngrok.com/fonts/jetbrains/jetbrainsmono-wght.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="https://assets.ngrok.com/fonts/jetbrains/jetbrainsmono-italic-wght.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="https://assets.ngrok.com/fonts/family/family-regular.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="https://assets.ngrok.com/fonts/family/family-italic.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+	</head>
+	<body class="bg-base isolate h-full">
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>

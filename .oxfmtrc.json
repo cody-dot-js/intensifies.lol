@@ -1,0 +1,28 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"tabWidth": 2,
+	"printWidth": 120,
+	"singleQuote": false,
+	"experimentalSortImports": {},
+	"experimentalTailwindcss": {
+		"functions": ["cx", "cn", "cva", "clsx"]
+	},
+	"ignorePatterns": [
+		".cache",
+		".changeset",
+		".env",
+		".react-router/",
+		".turbo",
+		".vercel",
+		"build",
+		"dist",
+		"node_modules",
+		"public",
+		"*/code-gen",
+		"*.json",
+		"*.svg",
+		"*.yaml",
+		"bun.lockb"
+	]
+}
