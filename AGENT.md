@@ -15,3 +15,4 @@
 - **Variable naming**: Always use descriptive names for common parameters:
   - Use `error` instead of `e` or `err` for error variables
   - Use `event` instead of `e` or `evt` for event parameters
+- **Comments should explain why, not what**: Avoid overuse of comments that restate the code like this:
