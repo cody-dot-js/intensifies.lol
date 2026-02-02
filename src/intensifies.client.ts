@@ -13,25 +13,39 @@ export async function generateIntensifiesGif(data: z.infer<typeof inputSchema>) 
 
 	const base64Data = imageData.split(",")[1];
 	const buffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
+	const blob = new Blob([buffer]);
 
-	const image = await createImageBitmap(new Blob([buffer]));
-	const width = 128;
-	const height = 128;
+	const size = 128;
+	const tempImage = await createImageBitmap(blob);
+	const aspectRatio = tempImage.width / tempImage.height;
+	let resizeWidth: number;
+	let resizeHeight: number;
+
+	if (aspectRatio > 1) {
+		resizeWidth = size;
+		resizeHeight = Math.round(size / aspectRatio);
+	} else {
+		resizeWidth = Math.round(size * aspectRatio);
+		resizeHeight = size;
+	}
+	tempImage.close();
+
+	const image = await createImageBitmap(blob, {
+		resizeWidth,
+		resizeHeight,
+		resizeQuality: "high",
+	});
+
+	const width = size;
+	const height = size;
 
 	const canvas = document.createElement("canvas");
 	canvas.width = width;
 	canvas.height = height;
 	const ctx = canvas.getContext("2d")!;
 
-	const aspectRatio = image.width / image.height;
-	let drawWidth = width;
-	let drawHeight = height;
-
-	if (aspectRatio > 1) {
-		drawHeight = width / aspectRatio;
-	} else {
-		drawWidth = height * aspectRatio;
-	}
+	const drawWidth = image.width;
+	const drawHeight = image.height;
 
 	const gif = GIFEncoder();
 	const numFrames = 12;
@@ -96,7 +110,13 @@ export async function generateIntensifiesGif(data: z.infer<typeof inputSchema>) 
 
 	gif.finish();
 	const gifBuffer = new Uint8Array(gif.bytes());
-	const base64Gif = btoa(String.fromCharCode(...gifBuffer));
+	let binary = "";
+	const chunkSize = 8192;
+	for (let i = 0; i < gifBuffer.length; i += chunkSize) {
+		const chunk = gifBuffer.subarray(i, i + chunkSize);
+		binary += String.fromCharCode(...chunk);
+	}
+	const base64Gif = btoa(binary);
 
 	const baseName = fileName.replace(/\.[^/.]+$/, "");
 	const outputFileName = `${baseName}_intensifies.gif`;

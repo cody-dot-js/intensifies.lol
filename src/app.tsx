@@ -64,10 +64,10 @@ export function App() {
 	}
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center p-8">
+		<div className="flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 sm:p-8">
 			<div className="w-full max-w-2xl space-y-8">
 				<div className="text-center">
-					<h1 className="mb-4 text-6xl font-bold">INTENSIFIES.LOL</h1>
+					<h1 className="mb-4 text-4xl font-bold sm:text-6xl">INTENSIFIES.LOL</h1>
 					<p className="text-muted-foreground">
 						Upload an image and make it an{" "}
 						<span className="animate-intensify text-strong inline-block">INTENSIFIED</span> gif!
