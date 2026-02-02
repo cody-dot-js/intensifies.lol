@@ -11,7 +11,7 @@ export function Layout({ children }: PropsWithChildren) {
 	return (
 		<ThemeProvider>
 			<Toaster />
-			<div className="flex min-h-screen flex-col">
+			<div className="flex min-h-dvh flex-col">
 				<a
 					href="#main"
 					className="sr-only"
