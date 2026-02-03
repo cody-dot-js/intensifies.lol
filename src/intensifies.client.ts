@@ -1,7 +1,10 @@
 import * as gifenc from "gifenc";
+import gifsicle from "gifsicle-wasm-browser";
 import { z } from "zod";
 
 const { GIFEncoder, quantize } = gifenc as any;
+
+const MAX_FILE_SIZE_BYTES = 128 * 1024;
 
 export const inputSchema = z.object({
 	imageData: z.string().startsWith("data:image/"),
@@ -48,7 +51,7 @@ export async function generateIntensifiesGif(data: z.infer<typeof inputSchema>) 
 	const drawHeight = image.height;
 
 	const gif = GIFEncoder();
-	const numFrames = 12;
+	const numFrames = 8;
 
 	for (let i = 0; i < numFrames; i++) {
 		ctx.clearRect(0, 0, width, height);
@@ -102,7 +105,7 @@ export async function generateIntensifiesGif(data: z.infer<typeof inputSchema>) 
 
 		gif.writeFrame(index, width, height, {
 			palette,
-			delay: 40,
+			delay: 50,
 			transparent: true,
 			transparentIndex,
 		});
@@ -110,10 +113,13 @@ export async function generateIntensifiesGif(data: z.infer<typeof inputSchema>) 
 
 	gif.finish();
 	const gifBuffer = new Uint8Array(gif.bytes());
+
+	const optimizedBuffer = await optimizeGif(gifBuffer);
+
 	let binary = "";
 	const chunkSize = 8192;
-	for (let i = 0; i < gifBuffer.length; i += chunkSize) {
-		const chunk = gifBuffer.subarray(i, i + chunkSize);
+	for (let i = 0; i < optimizedBuffer.length; i += chunkSize) {
+		const chunk = optimizedBuffer.subarray(i, i + chunkSize);
 		binary += String.fromCharCode(...chunk);
 	}
 	const base64Gif = btoa(binary);
@@ -122,4 +128,27 @@ export async function generateIntensifiesGif(data: z.infer<typeof inputSchema>) 
 	const outputFileName = `${baseName}_intensifies.gif`;
 
 	return { gifUrl: `data:image/gif;base64,${base64Gif}`, fileName: outputFileName };
+}
+
+async function optimizeGif(buffer: Uint8Array<ArrayBuffer>): Promise<Uint8Array> {
+	const inputFile = new File([buffer], "input.gif", { type: "image/gif" });
+
+	let lossyValue = 30;
+	let result = await runGifsicle(inputFile, lossyValue);
+
+	while (result.size > MAX_FILE_SIZE_BYTES && lossyValue < 200) {
+		lossyValue += 20;
+		result = await runGifsicle(inputFile, lossyValue);
+	}
+
+	return new Uint8Array(await result.arrayBuffer());
+}
+
+async function runGifsicle(inputFile: File, lossyValue: number): Promise<File> {
+	const output = await gifsicle.run({
+		input: [{ file: inputFile, name: "input.gif" }],
+		command: [`-O3 --lossy=${lossyValue} input.gif -o /out/output.gif`],
+	});
+
+	return output[0];
 }

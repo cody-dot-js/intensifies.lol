@@ -9,6 +9,7 @@
         "@phosphor-icons/react": "2.1.10",
         "@tanstack/react-form": "1.28.0",
         "gifenc": "1.0.3",
+        "gifsicle-wasm-browser": "1.5.19",
         "react": "19.2.4",
         "react-dom": "19.2.4",
         "zod": "4.3.6",
@@ -405,6 +406,8 @@
     "get-nonce": ["get-nonce@1.0.1", "", {}, "sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q=="],
 
     "gifenc": ["gifenc@1.0.3", "", {}, "sha512-xdr6AdrfGBcfzncONUOlXMBuc5wJDtOueE3c5rdG0oNgtINLD+f2iFZltrBRZYzACRbKr+mSVU/x98zv2u3jmw=="],
+
+    "gifsicle-wasm-browser": ["gifsicle-wasm-browser@1.5.19", "", {}, "sha512-f2j2QXvryrxake2DdeAaI96LfZ8adb62UUs9C2eNuQiTDiysh9aBPmyw1Q8fHe+x+is+RHXDEXvVQSELONwmhw=="],
 
     "globals": ["globals@17.3.0", "", {}, "sha512-yMqGUQVVCkD4tqjOJf3TnrvaaHDMYp4VlUSObbkIiuCPe/ofdMBFIAcBbCSRFWOnos6qRiTVStDwqPLUclaxIw=="],
 
