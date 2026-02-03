@@ -4,7 +4,7 @@ import { Card } from "@ngrok/mantle/card";
 import { cx } from "@ngrok/mantle/cx";
 import { DownloadSimpleIcon, ImageSquareIcon, SmileyMeltingIcon } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { generateIntensifiesGif, inputSchema } from "./intensifies.client";
 
@@ -63,6 +63,33 @@ export function App() {
 		}
 	}
 
+	useEffect(() => {
+		function handlePaste(event: ClipboardEvent) {
+			const items = event.clipboardData?.items;
+			if (!items) {
+				return;
+			}
+
+			for (const item of items) {
+				if (item.type.startsWith("image/")) {
+					event.preventDefault();
+					setErrorMessage(null);
+					const file = item.getAsFile();
+					if (file) {
+						processFile(file);
+					}
+					return;
+				}
+			}
+		}
+
+		document.addEventListener("paste", handlePaste);
+
+		return () => {
+			document.removeEventListener("paste", handlePaste);
+		};
+	});
+
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center overflow-hidden p-4 sm:p-8">
 			<div className="w-full max-w-2xl space-y-8">
@@ -76,144 +103,146 @@ export function App() {
 
 				<Card.Root>
 					<Card.Body>
-						{errorMessage && (
-							<Alert.Root priority="danger" className="mb-4">
-								<Alert.Icon />
-								<Alert.Content>
-									<Alert.Title>
-										Something went wrong <SmileyMeltingIcon className="inline-block" />
-									</Alert.Title>
-									<Alert.Description>{errorMessage}</Alert.Description>
-								</Alert.Content>
-							</Alert.Root>
-						)}
-						<form.Field name="imageData">
-							{(field) => (
-								<>
-									{!field.state.value ? (
-										<div
-											data-dragging={isDragging}
-											className={cx(
-												"border-card-muted data-[dragging~='true']:border-accent-500 data-[dragging~='true']:bg-card-hover rounded-lg border-2 border-dashed p-12 text-center transition-colors",
-											)}
-											onDragOver={(event) => {
-												event.preventDefault();
-												event.stopPropagation();
-												setIsDragging(true);
-											}}
-											onDragLeave={(event) => {
-												event.preventDefault();
-												event.stopPropagation();
-												setIsDragging(false);
-											}}
-											onDrop={(event) => {
-												event.preventDefault();
-												event.stopPropagation();
-												setIsDragging(false);
-												setErrorMessage(null);
-												const file = event.dataTransfer.files?.[0];
-												if (file) {
-													processFile(file);
-												}
-											}}
-										>
-											<input
-												ref={fileInputRef}
-												type="file"
-												accept="image/*"
-												onChange={(event) => {
+						<form
+							onSubmit={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								form.handleSubmit();
+							}}
+							className="space-y-6"
+						>
+							{errorMessage && (
+								<Alert.Root priority="danger">
+									<Alert.Icon />
+									<Alert.Content>
+										<Alert.Title>
+											Something went wrong <SmileyMeltingIcon className="inline-block" />
+										</Alert.Title>
+										<Alert.Description>{errorMessage}</Alert.Description>
+									</Alert.Content>
+								</Alert.Root>
+							)}
+							<form.Field name="imageData">
+								{(field) => (
+									<>
+										{!field.state.value ? (
+											<div
+												data-dragging={isDragging}
+												className={cx(
+													"border-card-muted data-[dragging~='true']:border-accent-500 data-[dragging~='true']:bg-card-hover rounded-lg border-2 border-dashed p-12 text-center transition-colors",
+												)}
+												onDragOver={(event) => {
+													event.preventDefault();
+													event.stopPropagation();
+													setIsDragging(true);
+												}}
+												onDragLeave={(event) => {
+													event.preventDefault();
+													event.stopPropagation();
+													setIsDragging(false);
+												}}
+												onDrop={(event) => {
+													event.preventDefault();
+													event.stopPropagation();
+													setIsDragging(false);
 													setErrorMessage(null);
-													const file = event.target.files?.[0];
+													const file = event.dataTransfer.files?.[0];
 													if (file) {
 														processFile(file);
 													}
 												}}
-												className="hidden"
-												id="file-upload"
-											/>
-											<div className="space-y-2">
-												<p className="text-muted-foreground text-sm">Drag and drop an image here, or</p>
-												<Button
-													type="button"
-													appearance="filled"
-													onClick={() => fileInputRef.current?.click()}
-													icon={<ImageSquareIcon />}
-												>
-													Choose image
-												</Button>
+											>
+												<input
+													ref={fileInputRef}
+													type="file"
+													accept="image/*"
+													onChange={(event) => {
+														setErrorMessage(null);
+														const file = event.target.files?.[0];
+														if (file) {
+															processFile(file);
+														}
+													}}
+													className="hidden"
+													id="file-upload"
+												/>
+												<div className="space-y-2">
+													<p className="text-muted-foreground text-sm">Drag and drop, paste, or</p>
+													<Button
+														type="button"
+														appearance="filled"
+														onClick={() => fileInputRef.current?.click()}
+														icon={<ImageSquareIcon />}
+													>
+														Choose image
+													</Button>
+												</div>
 											</div>
-										</div>
-									) : (
-										<form
-											onSubmit={(event) => {
-												event.preventDefault();
-												event.stopPropagation();
-												form.handleSubmit();
-											}}
-											className="space-y-6"
-										>
-											<div className="flex justify-center gap-4">
-												{!gifUrl && (
-													<Card.Root className="max-w-md p-4">
-														<p className="text-muted-foreground mb-2 text-sm">Preview:</p>
-														<img src={field.state.value} alt="Preview" className="w-full rounded" />
-													</Card.Root>
-												)}
+										) : (
+											<>
+												<div className="flex justify-center gap-4">
+													{!gifUrl && (
+														<Card.Root className="max-w-md p-4">
+															<p className="text-muted-foreground mb-2 text-sm">Preview:</p>
+															<img src={field.state.value} alt="Preview" className="w-full rounded" />
+														</Card.Root>
+													)}
 
-												{gifUrl && (
-													<Card.Root className="max-w-md p-4">
-														<p className="text-muted-foreground mb-2 text-sm">Result:</p>
-														<img src={gifUrl} alt="Intensified" className="w-full rounded" />
-													</Card.Root>
-												)}
-											</div>
+													{gifUrl && (
+														<Card.Root className="max-w-md p-4">
+															<p className="text-muted-foreground mb-2 text-sm">Result:</p>
+															<img src={gifUrl} alt="Intensified" className="w-full rounded" />
+														</Card.Root>
+													)}
+												</div>
 
-											<div className="mx-auto flex max-w-sm flex-col items-center justify-center gap-4">
-												{!gifUrl ? (
-													<>
-														<Button
-															type="submit"
-															className={cx(form.state.isSubmitting && "animate-intensify")}
-															disabled={form.state.isSubmitting}
-															priority="default"
-															appearance="filled"
-														>
-															{form.state.isSubmitting ? "INTENSIFYING..." : "INTENSIFY"}
-														</Button>
-														<Button type="reset" onClick={handleReset} className="text-muted" appearance="link">
-															Cancel
-														</Button>
-													</>
-												) : (
-													<>
-														<Button
-															type="button"
-															onClick={() => {
-																if (!gifUrl) {
-																	return;
-																}
+												<div className="mx-auto flex max-w-sm flex-col items-center justify-center gap-4">
+													{!gifUrl ? (
+														<>
+															<Button
+																type="submit"
+																className={cx(form.state.isSubmitting && "animate-intensify")}
+																disabled={form.state.isSubmitting}
+																priority="default"
+																appearance="filled"
+															>
+																{form.state.isSubmitting ? "INTENSIFYING..." : "INTENSIFY"}
+															</Button>
+															<Button type="reset" onClick={handleReset} className="text-muted" appearance="link">
+																Cancel
+															</Button>
+														</>
+													) : (
+														<>
+															<Button
+																type="button"
+																onClick={() => {
+																	if (!gifUrl) {
+																		return;
+																	}
 
-																const link = document.createElement("a");
-																link.href = gifUrl;
-																link.download = gifFileName || "intensifies.gif";
-																link.click();
-															}}
-															appearance="filled"
-															icon={<DownloadSimpleIcon />}
-														>
-															Download GIF
-														</Button>
-														<Button type="reset" onClick={handleReset} priority="neutral">
-															New Image
-														</Button>
-													</>
-												)}
-											</div>
-										</form>
-									)}
-								</>
-							)}
-						</form.Field>
+																	const link = document.createElement("a");
+																	link.href = gifUrl;
+																	link.download = gifFileName || "intensifies.gif";
+																	link.click();
+																}}
+																appearance="filled"
+																icon={<DownloadSimpleIcon />}
+															>
+																Download GIF
+															</Button>
+															<Button type="reset" onClick={handleReset} priority="neutral">
+																New Image
+															</Button>
+														</>
+													)}
+												</div>
+											</>
+										)}
+									</>
+								)}
+							</form.Field>
+						</form>
 					</Card.Body>
 				</Card.Root>
 			</div>
