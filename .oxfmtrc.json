@@ -20,7 +20,10 @@
 		"node_modules",
 		"public",
 		"*/code-gen",
+		"*.css",
+		"*.html",
 		"*.json",
+		"*.md",
 		"*.svg",
 		"*.yaml",
 		"bun.lockb"
